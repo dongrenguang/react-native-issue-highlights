@@ -68,11 +68,13 @@ async _fetchData() {
 ## 7. 在子组件中调用父组件中的方法
 在父组件中实例化子组件的时候，只要将父组件的方法（bind了this）作为一个`property`传递给子组件就好了。
 
-## 8. `ViewPagerAndroid`组件更新子View时的bug
+## 8. `ViewPagerAndroid`组件更新子`View`时的bug
 问题描述详见：[ViewPagerAndroid returns empty view when new source data added](https://github.com/facebook/react-native/issues/4775)
-搞了三四天才解决掉的神bug！！是React Native的`ViewPagerAndroid`一个bug，望Facebook尽快解决（截至@0.22版）。网上找到了三种解决办法:
-- (1) 在给ViewPagerAndroid添加key属性，在适当的时候（比如在删除某一个子View之后）更新这个key值（也就是让React Native彻底重绘此ViewPagerAndroid组件）；
-- (2) 使用第三方的组件[react-native-viewpager](https://github.com/race604/react-native-viewpager)取代ViewPagerAndroid；
-- (3) 期待Facebook尽快解决此问题，为Android平台的ScrollView添加pagingEnabled属性。
-因为牵扯到的组件太多、太复杂，只尝试了第一种方法，亲测可行，只不过是以牺牲性能为代价的（因为key变了，需要重绘整个组件），而且整个组建的变化看上去也不那么连贯（动画）；第二种方法方法据说性能较低；第三种方法有点空想社会主义。
+
+搞了三四天才解决掉的神bug！！是`React Native`的`ViewPagerAndroid`一个bug，望Facebook尽快解决（截至@0.22版）。网上找到了三种解决办法:
+- 给`ViewPagerAndroid`添加`key`属性，在适当的时候（比如在删除某一个子View之后）更新这个`key`值（也就是让`React Native`彻底重绘此`ViewPagerAndroid`组件）；
+- 使用第三方的组件[react-native-viewpager](https://github.com/race604/react-native-viewpager)取代`ViewPagerAndroid`；
+- 期待Facebook尽快解决此问题，为Android平台的`ScrollView`添加`pagingEnabled`属性。
+
+因为牵扯到的组件、逻辑太过复杂，只尝试了第一种方法，亲测可行，只不过是以牺牲性能为代价的（因为`key`变了，需要重绘整个组件），而且整个组建的变化看上去也不那么连贯（动画）；第二种方法方法据说性能较低；第三种方法有点空想社会主义。
 
