@@ -78,30 +78,38 @@ async _fetchData() {
 
 因为牵扯到的组件、逻辑太过复杂，只尝试了第一种方法，亲测可行，只不过是以牺牲性能为代价的（因为`key`变了，需要重绘整个组件），而且整个组建的变化看上去也不那么连贯（动画）；第二种方法方法据说性能较低；第三种方法有点空想社会主义。
 
-## 9. 在Navigator中调用Scene实例中的方法
-在顶层Navigator中，当从一个Scene（B）结束跳到之前的一个Scene（A）的时候，可能需要刷新Scene A（受在Scene B中的操作结果的影响）。只需要在顶层Navigator中设置onWillFocus属性（还有一个onDidFocus属性）。
+## 9. 在[Navigator](https://facebook.github.io/react-native/docs/navigator.html)中调用`Scene`实例中的方法
+在顶层`Navigator`中，当从一个`Scene`（B）结束跳到之前的一个`Scene`（A）的时候，可能需要刷新`Scene A`（受在`Scene B`中的操作结果的影响）。只需要在顶层`Navigator`中设置`onWillFocus`属性（还有一个`onDidFocus`属性）。
 ```javascript
-render() {
-    const initialRoute = {
-        scene: "bottomTabBar",
-        view: BottomTabs,
-        handleWillFocus: BottomTabs.handleWillFocus,
-    };
+import BottomTabs from "./scenes/tabBar/BottomTabs";
+......
 
-    return (
-        <Navigator
-            initialRoute={initialRoute}
-            renderScene={this._renderScene.bind(this)}
-            onWillFocus={(route) => {
-                if (route.handleWillFocus && (typeof route.handleWillFocus === "function")) {
-                    route.handleWillFocus();
-                }
-            }}
-        />
-    );
+export default class Application extends Component {
+    ......
+
+    render() {
+        const initialRoute = {
+            scene: "bottomTabBar",
+            view: BottomTabs,
+            handleWillFocus: BottomTabs.handleWillFocus,
+        };
+
+        return (
+            <Navigator
+                initialRoute={initialRoute}
+                renderScene={this._renderScene.bind(this)}
+                onWillFocus={(route) => {
+                    if (route.handleWillFocus && (typeof route.handleWillFocus === "function")) {
+                        route.handleWillFocus();
+                    }
+                }}
+            />
+        );
+    }
+
 }
 ```
-这里，BottomTabs的handleWillFocus是属于BottomTabs的类方法，而不是实例方法，具体的BottomTabs中的方法如下所示：
+这里，`BottomTabs`的`handleWillFocus`是属于`BottomTabs`的类方法，而不是实例方法，具体的`BottomTabs`中的方法如下所示：
 ```javascript
 let bottomTabsSingleton = null;   // Someting like "super singleton".
 export default class BottomTabs extends Component {
@@ -130,5 +138,5 @@ BottomTabs.handleWillFocus = () => {
     }
 };
 ```
-这里的handleWillFocus()，和bottomTabsSingleton是属于BottomTabs类的，而不是某一个实例对象的。bottomTabsSingleton某种程度上有点类似于单例模式，不过它总是指向最近创建的那个BottomTabs实例对象。这种方法也只适用于比较复杂的、只需要创建一次的组件的情况。
+这里的`handleWillFocus()`，和`bottomTabsSingleton`是属于`BottomTabs`类的，而不是某一个实例对象的。`bottomTabsSingleton`某种程度上有点类似于单例模式，不过它总是指向最近创建的那个`BottomTabs`实例对象。这种方法也只适用于比较复杂的、只需要创建一次的组件的情况。
 
