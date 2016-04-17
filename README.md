@@ -71,10 +71,64 @@ async _fetchData() {
 ## 8. `ViewPagerAndroid`组件更新子`View`时的bug
 问题描述详见：[ViewPagerAndroid returns empty view when new source data added](https://github.com/facebook/react-native/issues/4775)
 
-搞了三四天才解决掉的神bug！！是`React Native`的`ViewPagerAndroid`一个bug，望Facebook尽快解决（截至@0.22版）。网上找到了三种解决办法:
+搞了三四天才解决掉的神bug！！是`React Native`的`ViewPagerAndroid`组件的一个bug，望Facebook尽快解决（截至@0.22版）。网上找到了三种解决办法:
 - 给`ViewPagerAndroid`添加`key`属性，在适当的时候（比如在删除某一个子View之后）更新这个`key`值（也就是让`React Native`彻底重绘此`ViewPagerAndroid`组件）；
 - 使用第三方的组件[react-native-viewpager](https://github.com/race604/react-native-viewpager)取代`ViewPagerAndroid`；
 - 期待Facebook尽快解决此问题，为Android平台的`ScrollView`添加`pagingEnabled`属性。
 
 因为牵扯到的组件、逻辑太过复杂，只尝试了第一种方法，亲测可行，只不过是以牺牲性能为代价的（因为`key`变了，需要重绘整个组件），而且整个组建的变化看上去也不那么连贯（动画）；第二种方法方法据说性能较低；第三种方法有点空想社会主义。
+
+## 9. 在Navigator中调用Scene实例中的方法
+在顶层Navigator中，当从一个Scene（B）结束跳到之前的一个Scene（A）的时候，可能需要刷新Scene A（受在Scene B中的操作结果的影响）。只需要在顶层Navigator中设置onWillFocus属性（还有一个onDidFocus属性）。
+```javascript
+render() {
+    const initialRoute = {
+        scene: "bottomTabBar",
+        view: BottomTabs,
+        handleWillFocus: BottomTabs.handleWillFocus,
+    };
+
+    return (
+        <Navigator
+            initialRoute={initialRoute}
+            renderScene={this._renderScene.bind(this)}
+            onWillFocus={(route) => {
+                if (route.handleWillFocus && (typeof route.handleWillFocus === "function")) {
+                    route.handleWillFocus();
+                }
+            }}
+        />
+    );
+}
+```
+这里，BottomTabs的handleWillFocus是属于BottomTabs的类方法，而不是实例方法，具体的BottomTabs中的方法如下所示：
+```javascript
+let bottomTabsSingleton = null;   // Someting like "super singleton".
+export default class BottomTabs extends Component {
+    constructor(props) {
+        super(props);
+        ......
+    }
+
+    componentWillMount() {
+        bottomTabsSingleton = this;   
+    }
+
+    componentWillUnmount() {
+        bottomTabsSingleton = null;     
+    }
+
+    updateSubScenes() {
+        ......
+    }
+
+}
+
+BottomTabs.handleWillFocus = () => {
+    if (bottomTabsSingleton) {
+        bottomTabsSingleton.updateSubScenes();
+    }
+};
+```
+这里的handleWillFocus()，和bottomTabsSingleton是属于BottomTabs类的，而不是某一个实例对象的。bottomTabsSingleton某种程度上有点类似于单例模式，不过它总是指向最近创建的那个BottomTabs实例对象。这种方法也只适用于比较复杂的、只需要创建一次的组件的情况。
 
