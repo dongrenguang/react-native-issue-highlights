@@ -59,7 +59,7 @@ async _fetchData() {
 }
 ```
 
-## 5. 删除`ListView`子元素问题
+## 5. 删除[ListView](https://facebook.github.io/react-native/docs/listview.html#content)子元素问题
 删除`dataSource`中的某个值，React是这么做的：删掉`ListView`中的最后一个物理子元素，然后更新前面的物理子元素的`rowData`值。
 
 ## 6. 在父组件中调用子组件实例中的方法
@@ -68,7 +68,7 @@ async _fetchData() {
 ## 7. 在子组件中调用父组件中的方法
 在父组件中实例化子组件的时候，只要将父组件的方法（bind了this）作为一个`property`传递给子组件就好了。
 
-## 8. `ViewPagerAndroid`组件更新子`View`时的bug
+## 8. [ViewPagerAndroid](https://facebook.github.io/react-native/docs/viewpagerandroid.html#content)组件更新子`View`时的bug
 问题描述详见：[ViewPagerAndroid returns empty view when new source data added](https://github.com/facebook/react-native/issues/4775)
 
 搞了三四天才解决掉的神bug！！是`React Native`的`ViewPagerAndroid`组件的一个bug，望Facebook尽快解决（截至@0.22版）。网上找到了三种解决办法:
@@ -78,7 +78,7 @@ async _fetchData() {
 
 因为牵扯到的组件、逻辑太过复杂，只尝试了第一种方法，亲测可行，只不过是以牺牲性能为代价的（因为`key`变了，需要重绘整个组件），而且整个组建的变化看上去也不那么连贯（动画）；第二种方法方法据说性能较低；第三种方法有点空想社会主义。
 
-## 9. 在[Navigator](https://facebook.github.io/react-native/docs/navigator.html)中调用`Scene`实例中的方法
+## 9. 在[Navigator](https://facebook.github.io/react-native/docs/navigator.html#content)中调用`Scene`实例中的方法
 在顶层`Navigator`中，当从一个`Scene`（B）结束跳到之前的一个`Scene`（A）的时候，可能需要刷新`Scene A`（受在`Scene B`中的操作结果的影响）。只需要在顶层`Navigator`中设置`onWillFocus`属性（还有一个`onDidFocus`属性）。
 ```javascript
 import BottomTabs from "./scenes/tabBar/BottomTabs";
@@ -140,3 +140,38 @@ BottomTabs.handleWillFocus = () => {
 ```
 这里的`handleWillFocus()`，和`bottomTabsSingleton`是属于`BottomTabs`类的，而不是某一个实例对象的。`bottomTabsSingleton`某种程度上有点类似于单例模式，不过它总是指向最近创建的那个`BottomTabs`实例对象。这种方法也只适用于比较复杂的、只需要创建一次的组件的情况。
 
+## 10. 所谓的单向数据流
+一些前端框架（比如：AngularJS）的数据绑定是双向的，时常会造成状态混乱，难以控制。Facebook就是为了避免双向数据绑定所以才开发了所谓单向数据流的React —— 父组件向子组件传递property，在组件中通过setState()方法来控制视图更新。然而今天发现，不通过调用setState()方法也能更新视图：当组件的state是一个对象（或数组）的时候，直接改变这个state的值，不需要使用setState()方法也会造成状态更新。
+```javascript
+const name = ...
+const content = ...
+......
+
+const dataSource = this.state.dataSource;
+for (let rowData of dataSource) {
+    if (rowData["name"] === name) {
+        rowData["content"] = content;
+    }
+}
+```
+上面的代码中，用dataSource变量取得state值——dataSource（是一个数组，里面的元素是对象），直接修改dataSource数组元素中的值，然后直接导致视图更新。所以当你的state值是一个对象（数组）的时候，就要当心了。如果想要避免此类问题，在取得dataSource值的时候，需要用到深度对象拷贝(比如用JSON转化的方法)，代码如下：
+```javascript
+const name = ...
+const content = ...
+......
+
+const dataSource = JSON.parse(JSON.stringify(this.state.dataSource));
+for (let rowData of dataSource) {
+    if (rowData["name"] === name) {
+        rowData["content"] = content;
+    }
+}
+......
+
+this.setState({
+    dataSource,
+});
+```
+
+## 11. `Touchable`系列的组件的`margin`与`padding`属性
+`margin`加在外面的`Touchable**`上，不要加在里层的`View`上，不然造成点击`margin`位置的时候也会相应点击事件；`padding`可以加在里层的`View上`。
