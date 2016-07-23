@@ -10,7 +10,7 @@ React Native问题集锦，记录我在使用React Native（主要是Android）�
 <div align="center"><img src="./images/circle.png"  align="center" /></div>
 
 ```javascript
-<Image 
+<Image
     style={{height: 100, width: 100, borderRadius: (100 / 2) }}
     source={**} />
 ```
@@ -50,8 +50,8 @@ async _fetchData() {
     });
 
     if (responseJson.ok) {
-        const dataJson = await responseJson.json().catch((error) => { 
-            console.warn(error); 
+        const dataJson = await responseJson.json().catch((error) => {
+            console.warn(error);
         });
 
         console.log(dataJson.data.topNews);
@@ -175,3 +175,48 @@ this.setState({
 
 ## 11. `Touchable`系列的组件的`margin`与`padding`属性
 `margin`加在外面的`Touchable**`上，不要加在里层的`View`上，不然造成点击`margin`位置的时候也会相应点击事件；`padding`可以加在里层的`View上`。
+
+## 12. `Image`大小的自适应
+<div align="center">
+    <img src="./images/share-box.png"  width="150px"  align="center" />
+</div>
+如上所示的组件：上部是一张图片，下部是文字。如果想让图片占据父组件高度的3/4，下部文字占余下的1/4，那么你也许会想直接给`<Image>`组件样式的`flex`属相设置为3，下部`<Text>`组件的样式的`flex`属性设置为1，然而大概在`React Native` 0.30版以后，这种方法就无法达到预期的效果。正确的做法是在<Image>组件外层再嵌套一个`<View>`组件，其`flex`值为3，而嵌套在`<View>`中的<Image>的`flex`值设为-1来达到自适应的效果。
+
+具体代码示例：
+```javascript
+<TouchableOpacity style={styles.shareBox} onPress={handlePress}>
+    <View style={styles.shareIconWrapper}>
+        <Image
+            style={styles.shareIcon}
+            resizeMode={'contain'}
+            source={iconSource}
+        />
+    </View>
+    <Text numberOfLines={1} style={styles.shareIconText}>
+        {title}
+    </Text>
+</TouchableOpacity>
+
+......
+
+const styles = StyleSheet.create({
+    shareBox: {
+        flex: 1,
+        alignSelf: 'stretch',
+        alignItems: 'center',
+    },
+    shareIconWrapper: {
+        flex: 3,
+    },
+    shareIcon: {
+        flex: -1,
+    },
+    shareIconText: {
+        flex: 1,
+        fontSize: 13,
+        color: 'rgba(150, 150, 150, 1)',
+        textAlign: 'center',
+        textAlignVertical: 'top',   // Android only.
+    },
+});
+```
