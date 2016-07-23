@@ -178,9 +178,9 @@ this.setState({
 
 ## 12. `Image`大小的自适应
 <div align="center">
-    <img src="./images/share-box.png"  width="150px"  align="center" />
+    <img src="./images/share-box.png"  width="100px"  align="center" />
 </div>
-如上所示的组件：上部是一张图片，下部是文字，图片占据父组件高度的3/4，文字占余下的1/4。以前的做法是：直接把`<Image>`组件样式的`flex`属性设置为3，下部`<Text>`组件样式的`flex`属性设置为1。然而大概在`React Native` 0.30版以后，这种方法就无法达到预期的效果。正确的做法是在<Image>组件外层再嵌套一个`<View>`组件，其`flex`值为3；而嵌套在`<View>`中的<Image>的`flex`值设为-1来达到自适应的效果。官方API的解释是：“When flex is -1, the component is normally sized according width and height. However, if there's not enough space, the component will shrink to its minWidth and minHeight.”。另外，`React Native`中的`flex`布局与`CSS`中的不尽相同，详见文档。
+如上所示的组件：上部是一张图片，下部是文字，图片占据父组件高度的3/4，文字占余下的1/4。以前的做法是：直接把`<Image>`组件样式的`flex`属性设置为3，下部`<Text>`组件样式的`flex`属性设置为1。然而大概在`React Native` 0.30版以后，这种方法就无法达到预期的效果。正确的做法是在<Image>组件外层再嵌套一个`<View>`组件，其`flex`值为3；而嵌套在`<View>`中的<Image>的`flex`值设为-1来达到自适应的效果。官方API的解释是：[When flex is -1, the component is normally sized according width and height. However, if there's not enough space, the component will shrink to its minWidth and minHeight.](https://facebook.github.io/react-native/docs/layout-props.html)。另外，`React Native`中的`flex`布局与`CSS`中的不尽相同，[详见文档]((https://facebook.github.io/react-native/docs/layout-props.html))。
 
 具体代码示例：
 ```javascript
