@@ -1,5 +1,5 @@
-# react-native-issue-highlights
-React Native问题集锦，记录我在使用React Native（主要是Android）过程中遇到的问题。
+# React Native Tips
+React Native 开发小贴士 —— 记录我在使用React Native（主要是Android）过程中遇到的问题。
 
 ## 1. ReferenceError: Can't find variable: __fbBatchedBridge
 <div align="center"><img src="./images/red.png"  width="300px"  align="center" /></div>
